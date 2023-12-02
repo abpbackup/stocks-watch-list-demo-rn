@@ -4,6 +4,8 @@ import { Stock, ToggleMode } from '../constants/types';
 import { store } from '../store/store';
 import { stockApi } from '../services/stock.api';
 
+const UPDATE_INTERVAL_IN_MS = 5 * 1000;
+
 export const useMainState = () => {
   const [searchResults, setSearchResults] = useState<Stock[]>([]);
   const [watchlistStocks, setWatchlistStocks] = useState<Stock[]>([]);
@@ -11,6 +13,7 @@ export const useMainState = () => {
 
   const watchlistRef = useRef<Map<string, Stock>>(new Map());
   const searchResultsRef = useRef<Map<string, Stock>>(new Map());
+  const updateInterval = useRef<NodeJS.Timeout>();
 
   const handleSearch = useCallback(async (query: string) => {
     searchResultsRef.current.clear();
@@ -137,8 +140,22 @@ export const useMainState = () => {
         console.log(error);
       }
     };
-
     retrieveStocksFromLocalStore();
+
+    const startPriceUpdatesInterval = () => {
+      updateInterval.current = setInterval(() => {
+        const watchlistTickers = Array.from(watchlistRef.current.values()).map((s) => s);
+        const searchTickers = Array.from(searchResultsRef.current.values()).map((s) => s);
+        const tickers = [...watchlistTickers, ...searchTickers];
+
+        retrieveStockPricesFromApi(tickers, searchTickers.length > 0);
+      }, UPDATE_INTERVAL_IN_MS);
+    };
+    startPriceUpdatesInterval();
+
+    return () => {
+      clearInterval(updateInterval.current);
+    };
   }, []);
 
   return {
