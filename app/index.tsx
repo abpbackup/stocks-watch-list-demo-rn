@@ -21,6 +21,8 @@ const Home = () => {
   const starredStocksRef = useRef<Map<string, Stock>>(new Map());
 
   const performSearch = useCallback(async (query: string) => {
+    searchResultsRef.current.clear();
+
     if (query === '') {
       setSearchResults([]);
       return;
