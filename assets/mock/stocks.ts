@@ -1,4 +1,4 @@
-import { Stock } from '../constants/types';
+import { Stock } from '../../constants/types';
 
 export const mockStocks: Stock[] = [
   {
@@ -11,7 +11,7 @@ export const mockStocks: Stock[] = [
     companyName: 'Apple Inc.',
     ticker: 'AAPL',
     price: 145.3,
-    isStarred: false,
+    isStarred: true,
   },
   {
     companyName: 'Amazon.com Inc.',
@@ -23,7 +23,7 @@ export const mockStocks: Stock[] = [
     companyName: 'Tesla Inc.',
     ticker: 'TSLA',
     price: 225.54,
-    isStarred: false,
+    isStarred: true,
   },
   {
     companyName: 'Meta Platforms',

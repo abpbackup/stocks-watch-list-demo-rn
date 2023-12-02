@@ -38,7 +38,7 @@ export const SearchBar = ({ onSearch }: SearchBarProps) => {
           value={query}
           onChangeText={setQuery}
           style={styles.input}
-          clearButtonMode="always" // iOS only: shows a clear button within the input
+          clearButtonMode="always"
         />
       </View>
     </View>

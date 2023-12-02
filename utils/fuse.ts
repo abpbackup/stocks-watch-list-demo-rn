@@ -1,6 +1,6 @@
 import Fuse from 'fuse.js';
 
-import { mockStocks } from '../assets/stocks';
+import { mockStocks } from '../assets/mock/stocks';
 
 const fuseOptions = {
   keys: ['companyName', 'ticker'],
