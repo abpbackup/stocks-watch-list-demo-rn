@@ -10,6 +10,7 @@ import { SEARCH_RESULTS_MARGIN_OFFSET } from '../constants/ui';
 import { Searching } from '../components/Searching';
 import { useIsConnected } from '../providers/NetworkProvider';
 import { OfflineBanner } from '../components/OfflineBanner';
+import { ErrorBanner } from '../components/ErrorBanner';
 
 const Home = () => {
   const {
@@ -18,6 +19,8 @@ const Home = () => {
     searchResults,
     watchlistStocks,
     lastCloseMode,
+    error,
+    setError,
     handleSearch,
     handleToggleWatchlist,
     handleToggleLastCloseMode,
@@ -26,57 +29,61 @@ const Home = () => {
   const isConnected = useIsConnected();
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.searchBarContainer}>
-        <SearchBar isConnected={isConnected} onSearch={handleSearch} />
-      </View>
+    <>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.searchBarContainer}>
+          <SearchBar isConnected={isConnected} onSearch={handleSearch} />
+        </View>
 
-      {!!query && (
-        <BlurView style={styles.blurView} intensity={10}>
-          {loading && <Searching />}
+        {!!query && error == '' && (
+          <BlurView style={styles.blurView} intensity={10}>
+            {loading && <Searching />}
 
-          {!loading && searchResults.length > 0 && (
-            <FlatList
-              data={searchResults}
-              keyExtractor={(item) => item.ticker}
-              renderItem={({ item }) => (
-                <StockItem
-                  stock={item}
-                  lastCloseMode={lastCloseMode}
-                  onToggleWatchlist={handleToggleWatchlist}
-                  onToggleLastCloseMode={handleToggleLastCloseMode}
-                />
-              )}
-              keyboardShouldPersistTaps={'handled'}
+            {!loading && searchResults.length > 0 && (
+              <FlatList
+                data={searchResults}
+                keyExtractor={(item) => item.ticker}
+                renderItem={({ item }) => (
+                  <StockItem
+                    stock={item}
+                    lastCloseMode={lastCloseMode}
+                    onToggleWatchlist={handleToggleWatchlist}
+                    onToggleLastCloseMode={handleToggleLastCloseMode}
+                  />
+                )}
+                keyboardShouldPersistTaps={'handled'}
+              />
+            )}
+
+            {!loading && searchResults.length === 0 && <NoResults />}
+          </BlurView>
+        )}
+
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>Stocks watchlist</Text>
+        </View>
+
+        <FlatList
+          data={watchlistStocks}
+          keyExtractor={(item) => item.ticker}
+          renderItem={({ item }) => (
+            <StockItem
+              stock={{ ...item, isInWatchlist: true }}
+              lastCloseMode={lastCloseMode}
+              onToggleWatchlist={handleToggleWatchlist}
+              onToggleLastCloseMode={handleToggleLastCloseMode}
             />
           )}
-
-          {!loading && searchResults.length === 0 && <NoResults />}
-        </BlurView>
-      )}
-
-      <View style={styles.titleContainer}>
-        <Text style={styles.title}>Stocks watchlist</Text>
-      </View>
-
-      <FlatList
-        data={watchlistStocks}
-        keyExtractor={(item) => item.ticker}
-        renderItem={({ item }) => (
-          <StockItem
-            stock={{ ...item, isInWatchlist: true }}
-            lastCloseMode={lastCloseMode}
-            onToggleWatchlist={handleToggleWatchlist}
-            onToggleLastCloseMode={handleToggleLastCloseMode}
-          />
-        )}
-        style={styles.watchlistList}
-        contentContainerStyle={{ justifyContent: 'center' }}
-        keyboardShouldPersistTaps={'handled'}
-      />
+          style={styles.watchlistList}
+          contentContainerStyle={{ justifyContent: 'center' }}
+          keyboardShouldPersistTaps={'handled'}
+        />
+      </SafeAreaView>
 
       {!isConnected && <OfflineBanner />}
-    </SafeAreaView>
+
+      {!!error && <ErrorBanner error={error} onClose={() => setError('')} />}
+    </>
   );
 };
 

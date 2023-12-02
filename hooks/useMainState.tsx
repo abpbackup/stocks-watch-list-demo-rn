@@ -12,10 +12,21 @@ export const useMainState = () => {
   const [lastCloseMode, setLastCloseMode] = useState<ToggleMode>('amount');
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>('');
 
   const watchlistRef = useRef<Map<string, Stock>>(new Map());
   const searchResultsRef = useRef<Map<string, Stock>>(new Map());
   const updateInterval = useRef<NodeJS.Timeout>();
+
+  /**
+   * Note for improvment: In a multipage app this should be handled with a provider for the whole app
+   */
+  const errorHandler = (error: any) => {
+    setLoading(false);
+    setSearchResults([]);
+    setQuery('');
+    setError(String(error));
+  };
 
   const handleSearch = useCallback(async (query: string) => {
     searchResultsRef.current.clear();
@@ -46,8 +57,7 @@ export const useMainState = () => {
       // in the backend doesn't need to go the the database to look for coincidences but immediately for prices
       retrieveStockPricesFromApi(searchedStocks);
     } catch (error) {
-      console.log(error);
-      return [];
+      errorHandler(error);
     }
   }, []);
 
@@ -125,7 +135,7 @@ export const useMainState = () => {
         store.save('watchlist', updatedWatchList);
       }
     } catch (error) {
-      console.log(error);
+      errorHandler(error);
     }
   };
 
@@ -143,7 +153,7 @@ export const useMainState = () => {
 
         retrieveStockPricesFromApi(watchlist, false);
       } catch (error) {
-        console.log(error);
+        errorHandler(error);
       }
     };
     retrieveStocksFromLocalStore();
@@ -154,7 +164,11 @@ export const useMainState = () => {
         const searchTickers = Array.from(searchResultsRef.current.values()).map((s) => s);
         const tickers = [...watchlistTickers, ...searchTickers];
 
-        retrieveStockPricesFromApi(tickers, searchTickers.length > 0);
+        try {
+          retrieveStockPricesFromApi(tickers, searchTickers.length > 0);
+        } catch (error) {
+          errorHandler(error);
+        }
       }, UPDATE_INTERVAL_IN_MS);
     };
     startPriceUpdatesInterval();
@@ -170,6 +184,8 @@ export const useMainState = () => {
     searchResults,
     watchlistStocks,
     lastCloseMode,
+    error,
+    setError,
     handleSearch,
     handleToggleWatchlist,
     handleToggleLastCloseMode,

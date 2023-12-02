@@ -11,7 +11,7 @@ export const OfflineBanner = () => (
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    padding: 24,
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
@@ -19,6 +19,6 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 18,
-    color: '#ddd',
+    color: '#eee',
   },
 });

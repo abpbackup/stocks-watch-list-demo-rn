@@ -38,18 +38,14 @@ const createRestApi = () => {
         const data = await res.json();
         return mapStockResponseToStocks(data);
       } else {
-        console.log('@ToDo error findStocks -> !res.ok', res.statusText, res.status);
-        return [];
+        throw new Error(`statusText: ${res.statusText}, statusCode: ${res.status}`);
       }
     } catch (error) {
-      console.log('@ToDo error', error);
-      return [];
+      throw new Error(`At findStocks [${String(error)}]`);
     }
   };
 
   const getStockPrices = async (tickers: string[]): Promise<ApiPricesResponse> => {
-    console.log('!!!getStockPrices -> args', tickers);
-
     try {
       const url = `${apiUrl}prices/?tickers=${tickers.join(',')}`;
       const res = await fetch(url, {
@@ -65,12 +61,10 @@ const createRestApi = () => {
         const data = await res.json();
         return data;
       } else {
-        console.log('@ToDo error getStockPrices -> !res.ok', res.statusText, res.status);
-        return {};
+        throw new Error(`statusText: ${res.statusText}, statusCode: ${res.status}`);
       }
     } catch (error) {
-      console.log('@ToDo error getStockPrices', error);
-      return {};
+      throw new Error(`At getStockPrices [${String(error)}]`);
     }
   };
 
