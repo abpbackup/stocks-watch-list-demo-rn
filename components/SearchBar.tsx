@@ -6,10 +6,11 @@ import { View, TextInput } from '../components/Themed';
 const SEARCH_DEBOUNCE = 200;
 
 type SearchBarProps = {
+  isConnected: boolean;
   onSearch: (query: string) => void;
 };
 
-export const SearchBar = ({ onSearch }: SearchBarProps) => {
+export const SearchBar = ({ isConnected, onSearch }: SearchBarProps) => {
   const [query, setQuery] = useState('');
 
   const [debouncedQuery, setDebouncedQuery] = useState(query);
@@ -34,11 +35,12 @@ export const SearchBar = ({ onSearch }: SearchBarProps) => {
     <View style={styles.container}>
       <View style={styles.inputContainer}>
         <TextInput
-          placeholder="Search stocks"
+          placeholder={isConnected ? 'Search stocks' : 'Please check your connection'}
           value={query}
           onChangeText={setQuery}
           style={styles.input}
           clearButtonMode="always"
+          editable={isConnected}
         />
       </View>
     </View>

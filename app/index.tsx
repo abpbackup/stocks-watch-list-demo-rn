@@ -8,6 +8,8 @@ import { useMainState } from '../hooks/useMainState';
 import { NoResults } from '../components/NoResults';
 import { SEARCH_RESULTS_MARGIN_OFFSET } from '../constants/ui';
 import { Searching } from '../components/Searching';
+import { useIsConnected } from '../providers/NetworkProvider';
+import { OfflineBanner } from '../components/OfflineBanner';
 
 const Home = () => {
   const {
@@ -21,10 +23,12 @@ const Home = () => {
     handleToggleLastCloseMode,
   } = useMainState();
 
+  const isConnected = useIsConnected();
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.searchBarContainer}>
-        <SearchBar onSearch={handleSearch} />
+        <SearchBar isConnected={isConnected} onSearch={handleSearch} />
       </View>
 
       {!!query && (
@@ -70,6 +74,8 @@ const Home = () => {
         contentContainerStyle={{ justifyContent: 'center' }}
         keyboardShouldPersistTaps={'handled'}
       />
+
+      {!isConnected && <OfflineBanner />}
     </SafeAreaView>
   );
 };
