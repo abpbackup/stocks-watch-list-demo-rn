@@ -27,27 +27,29 @@ const Home = () => {
         <SearchBar onSearch={handleSearch} />
       </View>
 
-      {searchResults.length > 0 && (
+      {!!query && (
         <BlurView style={styles.blurView} intensity={10}>
-          <FlatList
-            data={searchResults}
-            keyExtractor={(item) => item.ticker}
-            renderItem={({ item }) => (
-              <StockItem
-                stock={item}
-                lastCloseMode={lastCloseMode}
-                onToggleWatchlist={handleToggleWatchlist}
-                onToggleLastCloseMode={handleToggleLastCloseMode}
-              />
-            )}
-            keyboardShouldPersistTaps={'handled'}
-          />
+          {loading && <Searching />}
+
+          {!loading && searchResults.length > 0 && (
+            <FlatList
+              data={searchResults}
+              keyExtractor={(item) => item.ticker}
+              renderItem={({ item }) => (
+                <StockItem
+                  stock={item}
+                  lastCloseMode={lastCloseMode}
+                  onToggleWatchlist={handleToggleWatchlist}
+                  onToggleLastCloseMode={handleToggleLastCloseMode}
+                />
+              )}
+              keyboardShouldPersistTaps={'handled'}
+            />
+          )}
+
+          {!loading && searchResults.length === 0 && <NoResults />}
         </BlurView>
       )}
-
-      {!!query && loading && <Searching />}
-
-      {searchResults.length === 0 && !!query && !loading && <NoResults />}
 
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Stocks watchlist</Text>
