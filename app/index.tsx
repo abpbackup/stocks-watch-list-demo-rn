@@ -75,6 +75,7 @@ const Home = () => {
             data={searchResults}
             keyExtractor={(item) => item.ticker}
             renderItem={({ item }) => <StockItem stock={item} onToggleStar={handleToggleStar} />}
+            keyboardShouldPersistTaps={'handled'}
           />
         </BlurView>
       )}
@@ -89,6 +90,7 @@ const Home = () => {
         renderItem={({ item }) => <StockItem stock={item} onToggleStar={handleToggleStar} />}
         style={styles.starredList}
         contentContainerStyle={{ justifyContent: 'center' }}
+        keyboardShouldPersistTaps={'handled'}
       />
     </SafeAreaView>
   );
