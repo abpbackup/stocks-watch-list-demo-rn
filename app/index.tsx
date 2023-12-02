@@ -1,27 +1,24 @@
 import { FlatList, StyleSheet } from 'react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { BlurView } from 'expo-blur';
-import Fuse, { FuseResult } from 'fuse.js';
 
 import { SearchBar } from '../components/SearchBar';
 import { Stock, ToggleMode } from '../constants/types';
-import { createFuzzySearch } from '../utils/fuse';
 import { StockItem } from '../components/StockItem';
-import { mockStocks } from '../assets/mock/stocks';
 import { View, Text, SafeAreaView } from '../components/Themed';
 import { store } from '../store/store';
+import { stockApi } from '../services/stock.api';
 
 // Needed for the blur effect
 const SEARCH_RESULTS_MARGIN_OFFSET = 110;
 
 const Home = () => {
   const [searchResults, setSearchResults] = useState<Stock[]>([]);
-  const [starredStocks, setStarredStocks] = useState<Stock[]>([]);
+  const [watchlistStocks, setWatchlistStocks] = useState<Stock[]>([]);
   const [lastCloseMode, setLastCloseMode] = useState<ToggleMode>('amount');
 
-  const stocksRef = useRef<Map<string, Stock>>(new Map());
+  const watchlistRef = useRef<Map<string, Stock>>(new Map());
   const searchResultsRef = useRef<Map<string, Stock>>(new Map());
-  const searcher = useRef<Fuse<Stock>>();
 
   const handleSearch = useCallback(async (query: string) => {
     searchResultsRef.current.clear();
@@ -31,47 +28,105 @@ const Home = () => {
       return;
     }
 
-    if (!searcher.current) {
-      console.log('@ToDO Manage this error');
-      return;
-    }
-
-    const results: FuseResult<Stock>[] = searcher.current.search(query);
-    const foundStocks = results.map((result) => result.item);
-
-    // Need to ensure the results are in the current state and to get the starred state
-    let searchedStocks: Stock[] = [];
-    foundStocks.forEach((s) => {
-      const stock = stocksRef.current.get(s.ticker);
-      if (stock) {
+    try {
+      const stocks = await stockApi.findStocks(query);
+      let searchedStocks: Stock[] = [];
+      stocks.forEach((stock) => {
+        const isInWatchList = watchlistRef.current.has(stock.ticker);
+        stock.isInWatchlist = isInWatchList;
         searchResultsRef.current.set(stock.ticker, stock);
         searchedStocks.push(stock);
-      }
-    });
-    setSearchResults(searchedStocks);
+      });
+      setSearchResults(searchedStocks);
+
+      // Note for improvement: I'd be better for the user experience if the search endPoint sent the prices
+      // in the payload so the user don't have to wait for a second or two the prices info while in the search
+      // results. The "static info" (ticker:name) could be in a cache (redis for instance) so that the query
+      // in the backend doesn't need to go the the database to look for coincidences but immediately for prices
+      retrieveStockPricesFromApi(searchedStocks);
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
   }, []);
 
-  const handleToggleStar = useCallback((ticker: string) => {
+  const handleToggleWatchlist = useCallback((ticker: string) => {
     // Updates the search results
     const searchStock = searchResultsRef.current.get(ticker);
     if (searchStock) {
-      searchResultsRef.current.set(ticker, { ...searchStock, isStarred: !searchStock.isStarred });
+      searchResultsRef.current.set(ticker, { ...searchStock, isInWatchlist: !searchStock.isInWatchlist });
       setSearchResults(Array.from(searchResultsRef.current.values()));
     }
 
-    // Updates the stocks list
-    const stock = stocksRef.current.get(ticker);
+    // Updates the watchlist
+    const stock = watchlistRef.current.get(ticker);
     if (stock) {
-      stocksRef.current.set(ticker, { ...stock, isStarred: !stock.isStarred });
-      const starred = Array.from(stocksRef.current.values()).filter((s) => s.isStarred);
-      setStarredStocks(starred);
-      store.save('starred', starred);
+      watchlistRef.current.delete(ticker);
+    } else if (searchStock) {
+      watchlistRef.current.set(ticker, searchStock);
     }
+    const watchlist = Array.from(watchlistRef.current.values());
+    setWatchlistStocks(watchlist);
+    store.save('watchlist', watchlist);
   }, []);
 
   const handleToggleLastCloseMode = useCallback(() => {
     setLastCloseMode((prev) => (prev === 'amount' ? 'percent' : 'amount'));
   }, []);
+
+  /**
+   * Get the prices for the watchlist stocks
+   */
+  const retrieveStockPricesFromApi = async (watchlist: Stock[], fromSearch = true) => {
+    if (watchlist.length === 0) {
+      return;
+    }
+
+    try {
+      const tickers = watchlist.map((s) => s.ticker);
+      const resp = await stockApi.getStockPrices(tickers);
+
+      // update the prices in the state
+      let shouldUpdateWatchlist = false;
+      for (const [ticker, prices] of Object.entries(resp)) {
+        if (fromSearch) {
+          const searchStock = searchResultsRef.current.get(ticker);
+          if (searchStock) {
+            searchResultsRef.current.set(ticker, {
+              ...searchStock,
+              price: prices.price,
+              lastClosePrice: prices.last_close,
+            });
+          }
+        }
+
+        const watchlistStock = watchlistRef.current.get(ticker);
+        if (watchlistStock) {
+          shouldUpdateWatchlist = true;
+          watchlistRef.current.set(ticker, {
+            ...watchlistStock,
+            price: prices.price,
+            lastClosePrice: prices.last_close,
+          });
+        }
+      }
+
+      // Render changes in the search results
+      if (fromSearch) {
+        const updatedSearchList = Array.from(searchResultsRef.current.values());
+        setSearchResults(updatedSearchList);
+      }
+
+      // Render changes and save to store
+      if (shouldUpdateWatchlist) {
+        const updatedWatchList = Array.from(watchlistRef.current.values());
+        setWatchlistStocks(updatedWatchList);
+        store.save('watchlist', updatedWatchList);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     /**
@@ -81,32 +136,17 @@ const Home = () => {
      */
     const retrieveStocksFromLocalStore = async () => {
       try {
-        const stocks = await store.get('stocks');
-        stocks.forEach((stock) => stocksRef.current.set(stock.ticker, stock));
+        const watchlist = await store.get('watchlist');
+        watchlist.forEach((stock) => watchlistRef.current.set(stock.ticker, stock));
+        setWatchlistStocks(watchlist);
 
-        const starred = await store.get('starred');
-        starred.forEach((stock) => stocksRef.current.set(stock.ticker, { ...stock, isStarred: true }));
-        setStarredStocks(starred);
+        retrieveStockPricesFromApi(watchlist, false);
       } catch (error) {
         console.log(error);
       }
     };
+
     retrieveStocksFromLocalStore();
-
-    /**
-     * Get the latest stock list to replace the data from the local storage
-     */
-    const retrieveStocksFromApi = async () => {
-      try {
-        const stocks = mockStocks;
-        stocks.forEach((stock) => stocksRef.current.set(stock.ticker, stock));
-        searcher.current = createFuzzySearch(stocks);
-        store.save('stocks', stocks);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    retrieveStocksFromApi();
   }, []);
 
   return (
@@ -124,7 +164,7 @@ const Home = () => {
               <StockItem
                 stock={item}
                 lastCloseMode={lastCloseMode}
-                onToggleStar={handleToggleStar}
+                onToggleWatchlist={handleToggleWatchlist}
                 onToggleLastCloseMode={handleToggleLastCloseMode}
               />
             )}
@@ -138,17 +178,17 @@ const Home = () => {
       </View>
 
       <FlatList
-        data={starredStocks}
+        data={watchlistStocks}
         keyExtractor={(item) => item.ticker}
         renderItem={({ item }) => (
           <StockItem
-            stock={item}
+            stock={{ ...item, isInWatchlist: true }}
             lastCloseMode={lastCloseMode}
-            onToggleStar={handleToggleStar}
+            onToggleWatchlist={handleToggleWatchlist}
             onToggleLastCloseMode={handleToggleLastCloseMode}
           />
         )}
-        style={styles.starredList}
+        style={styles.watchlistList}
         contentContainerStyle={{ justifyContent: 'center' }}
         keyboardShouldPersistTaps={'handled'}
       />
@@ -170,7 +210,7 @@ const styles = StyleSheet.create({
     marginTop: SEARCH_RESULTS_MARGIN_OFFSET,
     zIndex: 2,
   },
-  starredList: {
+  watchlistList: {
     width: '100%',
   },
   titleContainer: {

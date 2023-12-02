@@ -10,11 +10,16 @@ const noStarredIcon = require('../assets/images/ic_star_border.png');
 type StockItemProps = {
   stock: Stock;
   lastCloseMode: ToggleMode;
-  onToggleStar: (ticker: string) => void;
+  onToggleWatchlist: (ticker: string) => void;
   onToggleLastCloseMode: () => void;
 };
 
-export const StockItem = ({ stock, lastCloseMode = 'amount', onToggleStar, onToggleLastCloseMode }: StockItemProps) => {
+export const StockItem = ({
+  stock,
+  lastCloseMode = 'amount',
+  onToggleWatchlist,
+  onToggleLastCloseMode,
+}: StockItemProps) => {
   const lastCloseChange = useMemo(() => {
     const priceDiff = Number(stock.price) - Number(stock.lastClosePrice);
     const percentChange = (priceDiff / Number(stock.lastClosePrice)) * 100;
@@ -47,8 +52,8 @@ export const StockItem = ({ stock, lastCloseMode = 'amount', onToggleStar, onTog
               </TouchableOpacity>
             </View>
           </View>
-          <TouchableOpacity style={styles.starContainer} onPress={() => onToggleStar(stock.ticker)}>
-            <Image source={stock.isStarred ? starredIcon : noStarredIcon} style={styles.star} />
+          <TouchableOpacity style={styles.starContainer} onPress={() => onToggleWatchlist(stock.ticker)}>
+            <Image source={stock.isInWatchlist ? starredIcon : noStarredIcon} style={styles.star} />
           </TouchableOpacity>
         </View>
 

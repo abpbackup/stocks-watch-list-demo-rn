@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stock } from '../constants/types';
 
-type AvailableKeys = 'stocks' | 'starred';
+type AvailableKeys = 'stocks' | 'watchlist';
 
 const createStore = () => {
   const save = async (key: AvailableKeys, stocks: Stock[]) => {
