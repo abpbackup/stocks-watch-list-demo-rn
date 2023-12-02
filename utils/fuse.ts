@@ -1,6 +1,6 @@
 import Fuse from 'fuse.js';
 
-import { mockStocks } from '../assets/mock/stocks';
+import { Stock } from '../constants/types';
 
 const fuseOptions = {
   keys: ['companyName', 'ticker'],
@@ -8,4 +8,6 @@ const fuseOptions = {
   threshold: 0.3,
 };
 
-export const fuse = new Fuse(mockStocks, fuseOptions);
+export const createFuzzySearch = (stocks: Stock[]): Fuse<Stock> => {
+  return new Fuse(stocks, fuseOptions);
+};

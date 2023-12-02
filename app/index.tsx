@@ -4,10 +4,11 @@ import { BlurView } from 'expo-blur';
 
 import { SearchBar } from '../components/SearchBar';
 import { Stock } from '../constants/types';
-import { fuse } from '../utils/fuse';
+import { createFuzzySearch } from '../utils/fuse';
 import { StockItem } from '../components/StockItem';
 import { mockStocks } from '../assets/mock/stocks';
 import { View, Text, SafeAreaView } from '../components/Themed';
+import Fuse, { FuseResult } from 'fuse.js';
 
 // Needed for the blur effect
 const SEARCH_RESULTS_MARGIN_OFFSET = 110;
@@ -18,7 +19,7 @@ const Home = () => {
 
   const stocksRef = useRef<Map<string, Stock>>(new Map());
   const searchResultsRef = useRef<Map<string, Stock>>(new Map());
-  const starredStocksRef = useRef<Map<string, Stock>>(new Map());
+  const searcher = useRef<Fuse<Stock>>();
 
   const performSearch = useCallback(async (query: string) => {
     searchResultsRef.current.clear();
@@ -28,38 +29,47 @@ const Home = () => {
       return;
     }
 
-    const fuseResults = fuse.search(query);
-    const foundStocks = fuseResults.map((result) => result.item);
-    foundStocks.map((stock) => searchResultsRef.current.set(stock.ticker, stock));
-    setSearchResults(foundStocks);
+    if (!searcher.current) {
+      console.log('@ToDO Manage this error');
+      return;
+    }
+
+    const results: FuseResult<Stock>[] = searcher.current.search(query);
+    const foundStocks = results.map((result) => result.item);
+
+    // Need to ensure the results are in the current state and to get the starred state
+    let searchedStocks: Stock[] = [];
+    foundStocks.forEach((s) => {
+      const stock = stocksRef.current.get(s.ticker);
+      if (stock) {
+        searchResultsRef.current.set(stock.ticker, stock);
+        searchedStocks.push(stock);
+      }
+    });
+    setSearchResults(searchedStocks);
   }, []);
 
   const handleToggleStar = useCallback((ticker: string) => {
     // Updates the search results
-    const stock = searchResultsRef.current.get(ticker);
-    if (stock) {
-      searchResultsRef.current.set(ticker, { ...stock, isStarred: !stock.isStarred });
+    const searchStock = searchResultsRef.current.get(ticker);
+    if (searchStock) {
+      searchResultsRef.current.set(ticker, { ...searchStock, isStarred: !searchStock.isStarred });
       setSearchResults(Array.from(searchResultsRef.current.values()));
     }
 
-    // Updates the starred list
-    const isStarred = starredStocksRef.current.has(ticker);
-    if (isStarred) {
-      starredStocksRef.current.delete(ticker);
-    } else {
-      const stock = stocksRef.current.get(ticker);
-      if (stock) {
-        stock.isStarred = true;
-        starredStocksRef.current.set(ticker, stock);
-      }
+    // Updates the stocks list
+    const stock = stocksRef.current.get(ticker);
+    if (stock) {
+      stocksRef.current.set(ticker, { ...stock, isStarred: !stock.isStarred });
+      const starred = Array.from(stocksRef.current.values()).filter((s) => s.isStarred);
+      setStarredStocks(starred);
     }
-    setStarredStocks(Array.from(starredStocksRef.current.values()));
   }, []);
 
   useEffect(() => {
+    searcher.current = createFuzzySearch(mockStocks);
     mockStocks.forEach((stock) => stocksRef.current.set(stock.ticker, stock));
     const starred = mockStocks.filter((s) => s.isStarred);
-    starred.forEach((stock) => starredStocksRef.current.set(stock.ticker, stock));
     setStarredStocks(starred);
   }, [mockStocks]);
 
