@@ -19,13 +19,16 @@ export const useMainState = () => {
   const updateInterval = useRef<NodeJS.Timeout>();
 
   /**
-   * Note for improvment: In a multipage app this should be handled with a provider for the whole app
+   * Note for improvement: In a multi-page app this should be handled with a provider for the whole app
    */
   const errorHandler = (error: any) => {
     setLoading(false);
     setSearchResults([]);
     setQuery('');
     setError(String(error));
+
+    // Note for improvement: Integrate with a logger provider like Datadog, Sentry, Highlight.io
+    console.error(error);
   };
 
   const handleSearch = useCallback(async (query: string) => {

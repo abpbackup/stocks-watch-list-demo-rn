@@ -29,9 +29,9 @@ export const StockItem = React.memo(
       const priceDiff = Number(stock.price) - Number(stock.lastClosePrice);
       const percentChange = (priceDiff / Number(stock.lastClosePrice)) * 100;
       const prefix = lastCloseMode === 'amount' ? '$ ' : '';
-      const sufix = lastCloseMode === 'percent' ? ' %' : '';
+      const suffix = lastCloseMode === 'percent' ? ' %' : '';
       const val = (lastCloseMode === 'amount' ? priceDiff : percentChange).toFixed(2);
-      return `${prefix}${val}${sufix}`;
+      return `${prefix}${val}${suffix}`;
     }, [stock.price, stock.lastClosePrice, lastCloseMode]);
 
     const lastCloseColor = useMemo(() => {

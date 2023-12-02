@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   input: {
-    fontSize: 16,
+    fontSize: 18,
+    height: 36,
   },
 });

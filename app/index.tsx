@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet } from 'react-native';
+import { FlatList, Platform, StatusBar, StyleSheet } from 'react-native';
 import { BlurView } from 'expo-blur';
 
 import { SearchBar } from '../components/SearchBar';
@@ -28,56 +28,60 @@ const Home = () => {
 
   const isConnected = useIsConnected();
 
+  const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight : 0;
+
   return (
     <>
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.searchBarContainer}>
-          <SearchBar isConnected={isConnected} onSearch={handleSearch} />
-        </View>
+      <SafeAreaView style={[styles.safeArea, { paddingTop: statusBarHeight }]}>
+        <View style={{ width: '100%', flex: 1, paddingHorizontal: 10 }}>
+          <View style={styles.searchBarContainer}>
+            <SearchBar isConnected={isConnected} onSearch={handleSearch} />
+          </View>
 
-        {!!query && error == '' && (
-          <BlurView style={styles.blurView} intensity={10}>
-            {loading && <Searching />}
+          {!!query && error == '' && (
+            <BlurView style={styles.blurView} intensity={10}>
+              {loading && <Searching />}
 
-            {!loading && searchResults.length > 0 && (
-              <FlatList
-                data={searchResults}
-                keyExtractor={(item) => item.ticker}
-                renderItem={({ item }) => (
-                  <StockItem
-                    stock={item}
-                    lastCloseMode={lastCloseMode}
-                    onToggleWatchlist={handleToggleWatchlist}
-                    onToggleLastCloseMode={handleToggleLastCloseMode}
-                  />
-                )}
-                keyboardShouldPersistTaps={'handled'}
+              {!loading && searchResults.length > 0 && (
+                <FlatList
+                  data={searchResults}
+                  keyExtractor={(item) => item.ticker}
+                  renderItem={({ item }) => (
+                    <StockItem
+                      stock={item}
+                      lastCloseMode={lastCloseMode}
+                      onToggleWatchlist={handleToggleWatchlist}
+                      onToggleLastCloseMode={handleToggleLastCloseMode}
+                    />
+                  )}
+                  keyboardShouldPersistTaps={'handled'}
+                />
+              )}
+
+              {!loading && searchResults.length === 0 && <NoResults />}
+            </BlurView>
+          )}
+
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>Stocks watchlist</Text>
+          </View>
+
+          <FlatList
+            data={watchlistStocks}
+            keyExtractor={(item) => item.ticker}
+            renderItem={({ item }) => (
+              <StockItem
+                stock={{ ...item, isInWatchlist: true }}
+                lastCloseMode={lastCloseMode}
+                onToggleWatchlist={handleToggleWatchlist}
+                onToggleLastCloseMode={handleToggleLastCloseMode}
               />
             )}
-
-            {!loading && searchResults.length === 0 && <NoResults />}
-          </BlurView>
-        )}
-
-        <View style={styles.titleContainer}>
-          <Text style={styles.title}>Stocks watchlist</Text>
+            style={styles.watchlistList}
+            contentContainerStyle={{ justifyContent: 'center' }}
+            keyboardShouldPersistTaps={'handled'}
+          />
         </View>
-
-        <FlatList
-          data={watchlistStocks}
-          keyExtractor={(item) => item.ticker}
-          renderItem={({ item }) => (
-            <StockItem
-              stock={{ ...item, isInWatchlist: true }}
-              lastCloseMode={lastCloseMode}
-              onToggleWatchlist={handleToggleWatchlist}
-              onToggleLastCloseMode={handleToggleLastCloseMode}
-            />
-          )}
-          style={styles.watchlistList}
-          contentContainerStyle={{ justifyContent: 'center' }}
-          keyboardShouldPersistTaps={'handled'}
-        />
       </SafeAreaView>
 
       {!isConnected && <OfflineBanner />}
