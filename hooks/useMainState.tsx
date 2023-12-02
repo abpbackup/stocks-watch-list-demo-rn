@@ -10,6 +10,8 @@ export const useMainState = () => {
   const [searchResults, setSearchResults] = useState<Stock[]>([]);
   const [watchlistStocks, setWatchlistStocks] = useState<Stock[]>([]);
   const [lastCloseMode, setLastCloseMode] = useState<ToggleMode>('amount');
+  const [query, setQuery] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const watchlistRef = useRef<Map<string, Stock>>(new Map());
   const searchResultsRef = useRef<Map<string, Stock>>(new Map());
@@ -17,11 +19,14 @@ export const useMainState = () => {
 
   const handleSearch = useCallback(async (query: string) => {
     searchResultsRef.current.clear();
+    setQuery(query);
 
     if (query === '') {
       setSearchResults([]);
       return;
     }
+
+    setLoading(true);
 
     try {
       const stocks = await stockApi.findStocks(query);
@@ -32,6 +37,7 @@ export const useMainState = () => {
         searchResultsRef.current.set(stock.ticker, stock);
         searchedStocks.push(stock);
       });
+      setLoading(false);
       setSearchResults(searchedStocks);
 
       // Note for improvement: I'd be better for the user experience if the search endPoint sent the prices
@@ -159,6 +165,8 @@ export const useMainState = () => {
   }, []);
 
   return {
+    query,
+    loading,
     searchResults,
     watchlistStocks,
     lastCloseMode,

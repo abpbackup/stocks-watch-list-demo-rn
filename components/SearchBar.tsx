@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 
 import { View, TextInput } from '../components/Themed';
 
-const SEARCH_DEBOUNCE = 300;
+const SEARCH_DEBOUNCE = 200;
 
 type SearchBarProps = {
   onSearch: (query: string) => void;

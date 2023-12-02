@@ -5,12 +5,14 @@ import { SearchBar } from '../components/SearchBar';
 import { StockItem } from '../components/StockItem';
 import { View, Text, SafeAreaView } from '../components/Themed';
 import { useMainState } from '../hooks/useMainState';
-
-// Needed for the blur effect
-const SEARCH_RESULTS_MARGIN_OFFSET = 110;
+import { NoResults } from '../components/NoResults';
+import { SEARCH_RESULTS_MARGIN_OFFSET } from '../constants/ui';
+import { Searching } from '../components/Searching';
 
 const Home = () => {
   const {
+    query,
+    loading,
     searchResults,
     watchlistStocks,
     lastCloseMode,
@@ -42,6 +44,10 @@ const Home = () => {
           />
         </BlurView>
       )}
+
+      {!!query && loading && <Searching />}
+
+      {searchResults.length === 0 && !!query && !loading && <NoResults />}
 
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Stocks watchlist</Text>
