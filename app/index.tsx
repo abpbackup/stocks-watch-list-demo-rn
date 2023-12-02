@@ -1,6 +1,7 @@
 import { FlatList, StyleSheet } from 'react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { BlurView } from 'expo-blur';
+import Fuse, { FuseResult } from 'fuse.js';
 
 import { SearchBar } from '../components/SearchBar';
 import { Stock, ToggleMode } from '../constants/types';
@@ -8,7 +9,7 @@ import { createFuzzySearch } from '../utils/fuse';
 import { StockItem } from '../components/StockItem';
 import { mockStocks } from '../assets/mock/stocks';
 import { View, Text, SafeAreaView } from '../components/Themed';
-import Fuse, { FuseResult } from 'fuse.js';
+import { store } from '../store/store';
 
 // Needed for the blur effect
 const SEARCH_RESULTS_MARGIN_OFFSET = 110;
@@ -64,6 +65,7 @@ const Home = () => {
       stocksRef.current.set(ticker, { ...stock, isStarred: !stock.isStarred });
       const starred = Array.from(stocksRef.current.values()).filter((s) => s.isStarred);
       setStarredStocks(starred);
+      store.save('starred', starred);
     }
   }, []);
 
@@ -72,11 +74,40 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    searcher.current = createFuzzySearch(mockStocks);
-    mockStocks.forEach((stock) => stocksRef.current.set(stock.ticker, stock));
-    const starred = mockStocks.filter((s) => s.isStarred);
-    setStarredStocks(starred);
-  }, [mockStocks]);
+    /**
+     * Ensure the user always have the stocks list (at least after the first time the app is open) so both
+     * the search and the watchList are populated. If the user does NOT have internet access, the offline
+     * mode/UI is triggered
+     */
+    const retrieveStocksFromLocalStore = async () => {
+      try {
+        const stocks = await store.get('stocks');
+        stocks.forEach((stock) => stocksRef.current.set(stock.ticker, stock));
+
+        const starred = await store.get('starred');
+        starred.forEach((stock) => stocksRef.current.set(stock.ticker, { ...stock, isStarred: true }));
+        setStarredStocks(starred);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    retrieveStocksFromLocalStore();
+
+    /**
+     * Get the latest stock list to replace the data from the local storage
+     */
+    const retrieveStocksFromApi = async () => {
+      try {
+        const stocks = mockStocks;
+        stocks.forEach((stock) => stocksRef.current.set(stock.ticker, stock));
+        searcher.current = createFuzzySearch(stocks);
+        store.save('stocks', stocks);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    retrieveStocksFromApi();
+  }, []);
 
   return (
     <SafeAreaView style={styles.safeArea}>
