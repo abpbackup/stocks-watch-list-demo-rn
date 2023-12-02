@@ -29,7 +29,7 @@ export const mockStocks: Stock[] = [
     companyName: 'Meta Platforms',
     ticker: 'META',
     price: 325.38,
-    isStarred: false,
+    isStarred: true,
   },
   {
     companyName: 'Teladoc Health',
@@ -47,12 +47,18 @@ export const mockStocks: Stock[] = [
     companyName: 'YYYY asda',
     ticker: 'YYY',
     price: 32.58,
-    isStarred: false,
+    isStarred: true,
   },
   {
     companyName: 'ZZZZZ asda',
     ticker: 'ZZZ',
     price: 42.58,
     isStarred: false,
+  },
+  {
+    companyName: 'Albert Bank',
+    ticker: 'ALB',
+    price: 52.28,
+    isStarred: true,
   },
 ];
