@@ -5,6 +5,7 @@ import { View, Text } from './Themed';
 import { Stock, ToggleMode } from '../constants/types';
 import StarIcon from './StarIcon';
 import { primaryColor } from '../constants/Colors';
+import PricePlaceholder from './PricePlaceholder';
 
 type StockItemProps = {
   stock: Stock;
@@ -31,12 +32,12 @@ export const StockItem = React.memo(
       const sufix = lastCloseMode === 'percent' ? ' %' : '';
       const val = (lastCloseMode === 'amount' ? priceDiff : percentChange).toFixed(2);
       return `${prefix}${val}${sufix}`;
-    }, [stock, lastCloseMode]);
+    }, [stock.price, stock.lastClosePrice, lastCloseMode]);
 
     const lastCloseColor = useMemo(() => {
       const priceDiff = Number(stock.price) - Number(stock.lastClosePrice);
       return priceDiff > 0 ? 'green' : priceDiff < 0 ? 'red' : undefined;
-    }, [stock, lastCloseMode]);
+    }, [stock.price, stock.lastClosePrice, lastCloseMode]);
 
     return (
       stock && (
@@ -51,8 +52,10 @@ export const StockItem = React.memo(
                   </Text>
                 </View>
                 <TouchableOpacity style={styles.priceContainer} onPress={onToggleLastCloseMode}>
-                  <Text style={styles.price}>$ {stock.price?.toFixed(2)}</Text>
-                  <Text style={[styles.closePrice, { color: lastCloseColor }]}>{lastCloseChange}</Text>
+                  <Text style={styles.price}>$ {stock.price ? stock.price?.toFixed(2) : <PricePlaceholder />}</Text>
+                  <Text style={[styles.closePrice, { color: lastCloseColor }]}>
+                    {stock.price ? lastCloseChange : null}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
