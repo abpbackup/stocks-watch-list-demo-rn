@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Image } from 'react-native';
+import { StyleSheet, Image, TouchableOpacity } from 'react-native';
 
 import { View, Text } from './Themed';
 import { Stock } from '../constants/types';
@@ -7,9 +7,12 @@ import { Stock } from '../constants/types';
 const starredIcon = require('../assets/images/ic_star.png');
 const noStarredIcon = require('../assets/images/ic_star_border.png');
 
-export const StockInfo = ({ stock }: { stock: Stock }) => {
-  console.log({ stock });
+type StockItemProps = {
+  stock: Stock;
+  onToggleStar: (ticker: string) => void;
+};
 
+export const StockItem = ({ stock, onToggleStar }: StockItemProps) => {
   return (
     stock && (
       <>
@@ -27,9 +30,9 @@ export const StockInfo = ({ stock }: { stock: Stock }) => {
               <Text style={styles.name}>{stock.companyName}</Text>
             </View>
           </View>
-          <View style={styles.starContainer}>
+          <TouchableOpacity style={styles.starContainer} onPress={() => onToggleStar(stock.ticker)}>
             <Image source={stock.isStarred ? starredIcon : noStarredIcon} style={styles.star} />
-          </View>
+          </TouchableOpacity>
         </View>
 
         <View style={{ alignItems: 'center' }}>

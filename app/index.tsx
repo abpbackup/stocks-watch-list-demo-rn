@@ -1,11 +1,11 @@
 import { FlatList, StyleSheet } from 'react-native';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { BlurView } from 'expo-blur';
 
 import { SearchBar } from '../components/SearchBar';
 import { Stock } from '../constants/types';
 import { fuse } from '../utils/fuse';
-import { StockInfo } from '../components/Stock';
+import { StockItem } from '../components/StockItem';
 import { mockStocks } from '../assets/mock/stocks';
 import { View, Text, SafeAreaView } from '../components/Themed';
 
@@ -16,6 +16,10 @@ const Home = () => {
   const [searchResults, setSearchResults] = useState<Stock[]>([]);
   const [starredStocks, setStarredStocks] = useState<Stock[]>([]);
 
+  const stocksRef = useRef<Map<string, Stock>>(new Map());
+  const searchResultsRef = useRef<Map<string, Stock>>(new Map());
+  const starredStocksRef = useRef<Map<string, Stock>>(new Map());
+
   const performSearch = useCallback(async (query: string) => {
     if (query === '') {
       setSearchResults([]);
@@ -24,11 +28,36 @@ const Home = () => {
 
     const fuseResults = fuse.search(query);
     const foundStocks = fuseResults.map((result) => result.item);
+    foundStocks.map((stock) => searchResultsRef.current.set(stock.ticker, stock));
     setSearchResults(foundStocks);
   }, []);
 
+  const handleToggleStar = useCallback((ticker: string) => {
+    // Updates the search results
+    const stock = searchResultsRef.current.get(ticker);
+    if (stock) {
+      searchResultsRef.current.set(ticker, { ...stock, isStarred: !stock.isStarred });
+      setSearchResults(Array.from(searchResultsRef.current.values()));
+    }
+
+    // Updates the starred list
+    const isStarred = starredStocksRef.current.has(ticker);
+    if (isStarred) {
+      starredStocksRef.current.delete(ticker);
+    } else {
+      const stock = stocksRef.current.get(ticker);
+      if (stock) {
+        stock.isStarred = true;
+        starredStocksRef.current.set(ticker, stock);
+      }
+    }
+    setStarredStocks(Array.from(starredStocksRef.current.values()));
+  }, []);
+
   useEffect(() => {
+    mockStocks.forEach((stock) => stocksRef.current.set(stock.ticker, stock));
     const starred = mockStocks.filter((s) => s.isStarred);
+    starred.forEach((stock) => starredStocksRef.current.set(stock.ticker, stock));
     setStarredStocks(starred);
   }, [mockStocks]);
 
@@ -43,7 +72,7 @@ const Home = () => {
           <FlatList
             data={searchResults}
             keyExtractor={(item) => item.ticker}
-            renderItem={({ item }) => <StockInfo stock={item} />}
+            renderItem={({ item }) => <StockItem stock={item} onToggleStar={handleToggleStar} />}
           />
         </BlurView>
       )}
@@ -55,7 +84,7 @@ const Home = () => {
       <FlatList
         data={starredStocks}
         keyExtractor={(item) => item.ticker}
-        renderItem={({ item }) => <StockInfo stock={item} />}
+        renderItem={({ item }) => <StockItem stock={item} onToggleStar={handleToggleStar} />}
         style={styles.starredList}
         contentContainerStyle={{ justifyContent: 'center' }}
       />
