@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, SafeAreaView } from 'react-native';
+import { FlatList, StyleSheet } from 'react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { BlurView } from 'expo-blur';
 
@@ -7,7 +7,7 @@ import { Stock } from '../constants/types';
 import { fuse } from '../utils/fuse';
 import { StockInfo } from '../components/Stock';
 import { mockStocks } from '../assets/mock/stocks';
-import { View, Text } from '../components/Themed';
+import { View, Text, SafeAreaView } from '../components/Themed';
 
 // Needed for the blur effect
 const SEARCH_RESULTS_MARGIN_OFFSET = 110;
@@ -66,7 +66,6 @@ const Home = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: 'white',
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -3,7 +3,12 @@
  * https://docs.expo.io/guides/color-schemes/
  */
 
-import { Text as DefaultText, useColorScheme, View as DefaultView } from 'react-native';
+import {
+  Text as DefaultText,
+  useColorScheme,
+  View as DefaultView,
+  SafeAreaView as DefaultSafeAreaView,
+} from 'react-native';
 
 import Colors from '../constants/Colors';
 
@@ -34,6 +39,13 @@ export function Text(props: TextProps) {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
 
   return <DefaultText style={[{ color }, style]} {...otherProps} />;
+}
+
+export function SafeAreaView(props: TextProps) {
+  const { style, lightColor, darkColor, ...otherProps } = props;
+  const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
+
+  return <DefaultSafeAreaView style={[{ backgroundColor }, style]} {...otherProps} />;
 }
 
 export function View(props: ViewProps) {

@@ -34,7 +34,7 @@ export const SearchBar = ({ onSearch }: SearchBarProps) => {
     <View style={styles.container}>
       <View style={styles.inputContainer}>
         <TextInput
-          placeholder="Search for stocks"
+          placeholder="Search stocks"
           value={query}
           onChangeText={setQuery}
           style={styles.input}
@@ -48,7 +48,6 @@ export const SearchBar = ({ onSearch }: SearchBarProps) => {
 const styles = StyleSheet.create({
   container: {
     padding: 10,
-    backgroundColor: '#fff',
     width: '100%',
   },
   inputContainer: {
@@ -57,10 +56,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 15,
     paddingVertical: 8,
-    backgroundColor: '#f9f9f9',
   },
   input: {
     fontSize: 16,
-    color: '#333',
   },
 });
