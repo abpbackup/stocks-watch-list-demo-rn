@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { BlurView } from 'expo-blur';
 
 import { SearchBar } from '../components/SearchBar';
-import { Stock } from '../constants/types';
+import { Stock, ToggleMode } from '../constants/types';
 import { createFuzzySearch } from '../utils/fuse';
 import { StockItem } from '../components/StockItem';
 import { mockStocks } from '../assets/mock/stocks';
@@ -16,12 +16,13 @@ const SEARCH_RESULTS_MARGIN_OFFSET = 110;
 const Home = () => {
   const [searchResults, setSearchResults] = useState<Stock[]>([]);
   const [starredStocks, setStarredStocks] = useState<Stock[]>([]);
+  const [lastCloseMode, setLastCloseMode] = useState<ToggleMode>('amount');
 
   const stocksRef = useRef<Map<string, Stock>>(new Map());
   const searchResultsRef = useRef<Map<string, Stock>>(new Map());
   const searcher = useRef<Fuse<Stock>>();
 
-  const performSearch = useCallback(async (query: string) => {
+  const handleSearch = useCallback(async (query: string) => {
     searchResultsRef.current.clear();
 
     if (query === '') {
@@ -66,6 +67,10 @@ const Home = () => {
     }
   }, []);
 
+  const handleToggleLastCloseMode = useCallback(() => {
+    setLastCloseMode((prev) => (prev === 'amount' ? 'percent' : 'amount'));
+  }, []);
+
   useEffect(() => {
     searcher.current = createFuzzySearch(mockStocks);
     mockStocks.forEach((stock) => stocksRef.current.set(stock.ticker, stock));
@@ -76,7 +81,7 @@ const Home = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.searchBarContainer}>
-        <SearchBar onSearch={performSearch} />
+        <SearchBar onSearch={handleSearch} />
       </View>
 
       {searchResults.length > 0 && (
@@ -84,7 +89,14 @@ const Home = () => {
           <FlatList
             data={searchResults}
             keyExtractor={(item) => item.ticker}
-            renderItem={({ item }) => <StockItem stock={item} onToggleStar={handleToggleStar} />}
+            renderItem={({ item }) => (
+              <StockItem
+                stock={item}
+                lastCloseMode={lastCloseMode}
+                onToggleStar={handleToggleStar}
+                onToggleLastCloseMode={handleToggleLastCloseMode}
+              />
+            )}
             keyboardShouldPersistTaps={'handled'}
           />
         </BlurView>
@@ -97,7 +109,14 @@ const Home = () => {
       <FlatList
         data={starredStocks}
         keyExtractor={(item) => item.ticker}
-        renderItem={({ item }) => <StockItem stock={item} onToggleStar={handleToggleStar} />}
+        renderItem={({ item }) => (
+          <StockItem
+            stock={item}
+            lastCloseMode={lastCloseMode}
+            onToggleStar={handleToggleStar}
+            onToggleLastCloseMode={handleToggleLastCloseMode}
+          />
+        )}
         style={styles.starredList}
         contentContainerStyle={{ justifyContent: 'center' }}
         keyboardShouldPersistTaps={'handled'}

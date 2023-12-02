@@ -1,18 +1,34 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Image, TouchableOpacity } from 'react-native';
 
 import { View, Text } from './Themed';
-import { Stock } from '../constants/types';
+import { Stock, ToggleMode } from '../constants/types';
 
 const starredIcon = require('../assets/images/ic_star.png');
 const noStarredIcon = require('../assets/images/ic_star_border.png');
 
 type StockItemProps = {
   stock: Stock;
+  lastCloseMode: ToggleMode;
   onToggleStar: (ticker: string) => void;
+  onToggleLastCloseMode: () => void;
 };
 
-export const StockItem = ({ stock, onToggleStar }: StockItemProps) => {
+export const StockItem = ({ stock, lastCloseMode = 'amount', onToggleStar, onToggleLastCloseMode }: StockItemProps) => {
+  const lastCloseChange = useMemo(() => {
+    const priceDiff = Number(stock.price) - Number(stock.lastClosePrice);
+    const percentChange = (priceDiff / Number(stock.lastClosePrice)) * 100;
+    const prefix = lastCloseMode === 'amount' ? '$ ' : '';
+    const sufix = lastCloseMode === 'percent' ? ' %' : '';
+    const val = (lastCloseMode === 'amount' ? priceDiff : percentChange).toFixed(2);
+    return `${prefix}${val}${sufix}`;
+  }, [stock, lastCloseMode]);
+
+  const lastCloseColor = useMemo(() => {
+    const priceDiff = Number(stock.price) - Number(stock.lastClosePrice);
+    return priceDiff > 0 ? 'green' : priceDiff < 0 ? 'red' : undefined;
+  }, [stock, lastCloseMode]);
+
   return (
     stock && (
       <>
@@ -21,13 +37,14 @@ export const StockItem = ({ stock, onToggleStar }: StockItemProps) => {
             <View style={styles.header}>
               <View style={styles.tickerContainer}>
                 <Text style={styles.ticker}>{stock.ticker}</Text>
+                <Text numberOfLines={1} style={styles.name}>
+                  {stock.companyName}
+                </Text>
               </View>
-              <View style={styles.tickerContainer}>
-                <Text style={styles.price}>{stock.price}</Text>
-              </View>
-            </View>
-            <View style={styles.footer}>
-              <Text style={styles.name}>{stock.companyName}</Text>
+              <TouchableOpacity style={styles.priceContainer} onPress={onToggleLastCloseMode}>
+                <Text style={styles.price}>$ {stock.price?.toFixed(2)}</Text>
+                <Text style={[styles.closePrice, { color: lastCloseColor }]}>{lastCloseChange}</Text>
+              </TouchableOpacity>
             </View>
           </View>
           <TouchableOpacity style={styles.starContainer} onPress={() => onToggleStar(stock.ticker)}>
@@ -59,7 +76,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   tickerContainer: {
-    flexGrow: 1,
+    width: '60%',
   },
   ticker: {
     fontSize: 16,
@@ -71,7 +88,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'right',
   },
-  footer: { marginTop: 5 },
+  closePrice: {
+    fontSize: 13,
+    fontStyle: 'italic',
+    textAlign: 'right',
+  },
   name: {
     fontSize: 13,
     fontStyle: 'italic',
