@@ -1,11 +1,10 @@
 import React, { useMemo } from 'react';
-import { StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity, useColorScheme } from 'react-native';
 
 import { View, Text } from './Themed';
 import { Stock, ToggleMode } from '../constants/types';
-
-const starredIcon = require('../assets/images/ic_star.png');
-const noStarredIcon = require('../assets/images/ic_star_border.png');
+import StarIcon from './StarIcon';
+import { primaryColor } from '../constants/Colors';
 
 type StockItemProps = {
   stock: Stock;
@@ -14,56 +13,62 @@ type StockItemProps = {
   onToggleLastCloseMode: () => void;
 };
 
-export const StockItem = ({
-  stock,
-  lastCloseMode = 'amount',
-  onToggleWatchlist,
-  onToggleLastCloseMode,
-}: StockItemProps) => {
-  const lastCloseChange = useMemo(() => {
-    const priceDiff = Number(stock.price) - Number(stock.lastClosePrice);
-    const percentChange = (priceDiff / Number(stock.lastClosePrice)) * 100;
-    const prefix = lastCloseMode === 'amount' ? '$ ' : '';
-    const sufix = lastCloseMode === 'percent' ? ' %' : '';
-    const val = (lastCloseMode === 'amount' ? priceDiff : percentChange).toFixed(2);
-    return `${prefix}${val}${sufix}`;
-  }, [stock, lastCloseMode]);
+export const StockItem = React.memo(
+  ({ stock, lastCloseMode = 'amount', onToggleWatchlist, onToggleLastCloseMode }: StockItemProps) => {
+    const theme = useColorScheme() ?? 'light';
 
-  const lastCloseColor = useMemo(() => {
-    const priceDiff = Number(stock.price) - Number(stock.lastClosePrice);
-    return priceDiff > 0 ? 'green' : priceDiff < 0 ? 'red' : undefined;
-  }, [stock, lastCloseMode]);
+    const starFillColor = useMemo(() => {
+      return theme === 'dark' ? (stock.isInWatchlist ? 'blue' : 'white') : stock.isInWatchlist ? primaryColor : '#ddd';
+    }, [theme]);
+    const starBorderColor = useMemo(() => {
+      return theme === 'dark' ? (stock.isInWatchlist ? 'white' : 'gray') : stock.isInWatchlist ? primaryColor : '#aaa';
+    }, [theme]);
 
-  return (
-    stock && (
-      <>
-        <View style={styles.container}>
-          <View style={styles.data}>
-            <View style={styles.header}>
-              <View style={styles.tickerContainer}>
-                <Text style={styles.ticker}>{stock.ticker}</Text>
-                <Text numberOfLines={1} style={styles.name}>
-                  {stock.companyName}
-                </Text>
+    const lastCloseChange = useMemo(() => {
+      const priceDiff = Number(stock.price) - Number(stock.lastClosePrice);
+      const percentChange = (priceDiff / Number(stock.lastClosePrice)) * 100;
+      const prefix = lastCloseMode === 'amount' ? '$ ' : '';
+      const sufix = lastCloseMode === 'percent' ? ' %' : '';
+      const val = (lastCloseMode === 'amount' ? priceDiff : percentChange).toFixed(2);
+      return `${prefix}${val}${sufix}`;
+    }, [stock, lastCloseMode]);
+
+    const lastCloseColor = useMemo(() => {
+      const priceDiff = Number(stock.price) - Number(stock.lastClosePrice);
+      return priceDiff > 0 ? 'green' : priceDiff < 0 ? 'red' : undefined;
+    }, [stock, lastCloseMode]);
+
+    return (
+      stock && (
+        <>
+          <View style={styles.container}>
+            <View style={styles.data}>
+              <View style={styles.header}>
+                <View style={styles.tickerContainer}>
+                  <Text style={styles.ticker}>{stock.ticker}</Text>
+                  <Text numberOfLines={1} style={styles.name}>
+                    {stock.companyName}
+                  </Text>
+                </View>
+                <TouchableOpacity style={styles.priceContainer} onPress={onToggleLastCloseMode}>
+                  <Text style={styles.price}>$ {stock.price?.toFixed(2)}</Text>
+                  <Text style={[styles.closePrice, { color: lastCloseColor }]}>{lastCloseChange}</Text>
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity style={styles.priceContainer} onPress={onToggleLastCloseMode}>
-                <Text style={styles.price}>$ {stock.price?.toFixed(2)}</Text>
-                <Text style={[styles.closePrice, { color: lastCloseColor }]}>{lastCloseChange}</Text>
-              </TouchableOpacity>
             </View>
+            <TouchableOpacity style={styles.starContainer} onPress={() => onToggleWatchlist(stock.ticker)}>
+              <StarIcon color={starFillColor} borderColor={starBorderColor} size={30} />
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.starContainer} onPress={() => onToggleWatchlist(stock.ticker)}>
-            <Image source={stock.isInWatchlist ? starredIcon : noStarredIcon} style={styles.star} />
-          </TouchableOpacity>
-        </View>
 
-        <View style={{ alignItems: 'center' }}>
-          <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-        </View>
-      </>
-    )
-  );
-};
+          <View style={{ alignItems: 'center' }}>
+            <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
+          </View>
+        </>
+      )
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   container: {

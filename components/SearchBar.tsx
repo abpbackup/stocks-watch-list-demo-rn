@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { TextInput, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 
-import { View } from '../components/Themed';
+import { View, TextInput } from '../components/Themed';
 
 const SEARCH_DEBOUNCE = 300;
 
