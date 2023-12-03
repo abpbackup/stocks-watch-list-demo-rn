@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "stock-watchlist-rn-expo",
+    "name": "Stock Watchlist",
     "slug": "stock-watchlist",
     "description": "This project is a very basic learning material that covers key aspects of building a react native application using Expo, AsyncStorage, and TypeScript. It demonstrates the use of the Fetch API, error handling, reactive UI and some other user-friendly app behaviors.",
     "version": "1.0.0",
