@@ -35,8 +35,12 @@ export const useMainState = () => {
     setLoading(false);
     setSearchResults([]);
     setQuery('');
-    Keyboard.dismiss();
+    closeKeyboard();
     searchRef.current?.clearSearchInput();
+  };
+
+  const closeKeyboard = () => {
+    Keyboard.dismiss();
   };
 
   const handleSearch = useCallback(async (query: string) => {
@@ -208,5 +212,6 @@ export const useMainState = () => {
     handleToggleWatchlist,
     handleToggleLastCloseMode,
     cancelSearch,
+    closeKeyboard,
   };
 };

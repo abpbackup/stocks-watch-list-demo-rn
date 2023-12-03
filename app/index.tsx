@@ -1,4 +1,4 @@
-import { FlatList, Platform, StatusBar, StyleSheet } from 'react-native';
+import { FlatList, Platform, StatusBar, StyleSheet, Dimensions } from 'react-native';
 import { BlurView } from 'expo-blur';
 
 import { SearchBar } from '../components/SearchBar';
@@ -26,6 +26,7 @@ const Home = () => {
     handleToggleWatchlist,
     handleToggleLastCloseMode,
     cancelSearch,
+    closeKeyboard,
   } = useMainState();
 
   const isConnected = useIsConnected();
@@ -33,6 +34,8 @@ const Home = () => {
   const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight : 0;
 
   const showBlur = !!query;
+
+  const screenHeight = Dimensions.get('window').height || 500;
 
   return (
     <>
@@ -43,7 +46,10 @@ const Home = () => {
           </View>
 
           {!!query && error == '' && (
-            <View style={styles.searchResultsContainer}>
+            <View
+              style={[styles.searchResultsContainer, { maxHeight: screenHeight - SEARCH_RESULTS_MARGIN_OFFSET }]}
+              onTouchEnd={closeKeyboard}
+            >
               {loading && <Searching />}
 
               {!loading && searchResults.length > 0 && (
