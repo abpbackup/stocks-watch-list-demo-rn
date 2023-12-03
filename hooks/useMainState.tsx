@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Stock, ToggleMode } from '../constants/types';
 import { store } from '../store/store';
 import { stockApi } from '../services/stock.api';
+import { Keyboard } from 'react-native';
 
 const UPDATE_INTERVAL_IN_MS = 5 * 1000;
 
@@ -17,18 +18,25 @@ export const useMainState = () => {
   const watchlistRef = useRef<Map<string, Stock>>(new Map());
   const searchResultsRef = useRef<Map<string, Stock>>(new Map());
   const updateInterval = useRef<NodeJS.Timeout>();
+  const searchRef = useRef<{ clearSearchInput: () => void }>();
 
   /**
    * Note for improvement: In a multi-page app this should be handled with a provider for the whole app
    */
   const errorHandler = (error: any) => {
-    setLoading(false);
-    setSearchResults([]);
-    setQuery('');
+    cancelSearch();
     setError(String(error));
 
     // Note for improvement: Integrate with a logger provider like Datadog, Sentry, Highlight.io
     console.error(error);
+  };
+
+  const cancelSearch = () => {
+    setLoading(false);
+    setSearchResults([]);
+    setQuery('');
+    Keyboard.dismiss();
+    searchRef.current?.clearSearchInput();
   };
 
   const handleSearch = useCallback(async (query: string) => {
@@ -188,9 +196,11 @@ export const useMainState = () => {
     watchlistStocks,
     lastCloseMode,
     error,
+    searchRef,
     setError,
     handleSearch,
     handleToggleWatchlist,
     handleToggleLastCloseMode,
+    cancelSearch,
   };
 };

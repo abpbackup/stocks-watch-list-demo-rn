@@ -20,26 +20,30 @@ const Home = () => {
     watchlistStocks,
     lastCloseMode,
     error,
+    searchRef,
     setError,
     handleSearch,
     handleToggleWatchlist,
     handleToggleLastCloseMode,
+    cancelSearch,
   } = useMainState();
 
   const isConnected = useIsConnected();
 
   const statusBarHeight = Platform.OS === 'android' ? StatusBar.currentHeight : 0;
 
+  const showBlur = !!query;
+
   return (
     <>
       <SafeAreaView style={[styles.safeArea, { paddingTop: statusBarHeight }]}>
         <View style={{ width: '100%', flex: 1, paddingHorizontal: 10 }}>
           <View style={styles.searchBarContainer}>
-            <SearchBar isConnected={isConnected} onSearch={handleSearch} />
+            <SearchBar ref={searchRef} isConnected={isConnected} onSearch={handleSearch} />
           </View>
 
           {!!query && error == '' && (
-            <BlurView style={styles.blurView} intensity={10}>
+            <View style={styles.searchResultsContainer}>
               {loading && <Searching />}
 
               {!loading && searchResults.length > 0 && (
@@ -63,8 +67,10 @@ const Home = () => {
               )}
 
               {!loading && searchResults.length === 0 && <NoResults />}
-            </BlurView>
+            </View>
           )}
+
+          {showBlur && <BlurView style={styles.blurView} intensity={10} onTouchEnd={cancelSearch} />}
 
           <View style={styles.titleContainer}>
             <Text style={styles.title}>Stocks watchlist</Text>
@@ -108,10 +114,19 @@ const styles = StyleSheet.create({
   searchBarContainer: {
     width: '100%',
   },
+  searchResultsContainer: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    right: 0,
+    marginTop: SEARCH_RESULTS_MARGIN_OFFSET,
+    backgroundColor: 'transparent',
+    zIndex: 2,
+  },
   blurView: {
     ...StyleSheet.absoluteFillObject,
     marginTop: SEARCH_RESULTS_MARGIN_OFFSET,
-    zIndex: 2,
+    zIndex: 1,
   },
   watchlistList: {
     width: '100%',

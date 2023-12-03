@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { View, TextInput } from '../components/Themed';
@@ -10,10 +10,16 @@ type SearchBarProps = {
   onSearch: (query: string) => void;
 };
 
-export const SearchBar = ({ isConnected, onSearch }: SearchBarProps) => {
+export const SearchBar = forwardRef(({ isConnected, onSearch }: SearchBarProps, ref) => {
   const [query, setQuery] = useState('');
 
   const [debouncedQuery, setDebouncedQuery] = useState(query);
+
+  useImperativeHandle(ref, () => ({
+    clearSearchInput() {
+      setQuery('');
+    },
+  }));
 
   // Debounce search query
   useEffect(() => {
@@ -45,7 +51,7 @@ export const SearchBar = ({ isConnected, onSearch }: SearchBarProps) => {
       </View>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
