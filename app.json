@@ -1,7 +1,8 @@
 {
   "expo": {
     "name": "stock-watchlist-rn-expo",
-    "slug": "stock-watchlist-rn-expo",
+    "slug": "stock-watchlist",
+    "description": "This project is a very basic learning material that covers key aspects of building a react native application using Expo, AsyncStorage, and TypeScript. It demonstrates the use of the Fetch API, error handling, reactive UI and some other user-friendly app behaviors.",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -33,7 +34,14 @@
     },
     "extra": {
       "apiUrl": "https://app.albert.com/casestudy/stock/v2/",
-      "apiKey": "d2db5753-33f6-4e25-b915-6cbdda7953e7"
-    }
+      "apiKey": "d2db5753-33f6-4e25-b915-6cbdda7953e7",
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "372101d6-7752-432a-864c-ace440df6408"
+      }
+    },
+    "owner": "abp.backup"
   }
 }
