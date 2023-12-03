@@ -87,7 +87,7 @@ export const useMainState = () => {
     } else if (searchStock) {
       watchlistRef.current.set(ticker, searchStock);
     }
-    const watchlist = Array.from(watchlistRef.current.values());
+    const watchlist = Array.from(watchlistRef.current.values()).sort((a, b) => a.ticker.localeCompare(b.ticker));
     setWatchlistStocks(watchlist);
     store.save('watchlist', watchlist);
   }, []);
@@ -141,7 +141,9 @@ export const useMainState = () => {
 
       // Render changes and save to store
       if (shouldUpdateWatchlist) {
-        const updatedWatchList = Array.from(watchlistRef.current.values());
+        const updatedWatchList = Array.from(watchlistRef.current.values()).sort((a, b) =>
+          a.ticker.localeCompare(b.ticker)
+        );
         setWatchlistStocks(updatedWatchList);
         store.save('watchlist', updatedWatchList);
       }
