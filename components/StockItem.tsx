@@ -1,11 +1,15 @@
 import React, { useMemo } from 'react';
-import { StyleSheet, TouchableOpacity, useColorScheme } from 'react-native';
+import { StyleSheet, TouchableOpacity, useColorScheme, Animated } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 
 import { View, Text } from './Themed';
-import { Stock, ToggleMode } from '../constants/types';
+import { ToggleMode } from '../constants/types';
 import StarIcon from './StarIcon';
 import { primaryColor } from '../constants/Colors';
 import PricePlaceholder from './PricePlaceholder';
+import { TrashIcon } from './TrashIcon';
+
+declare type AnimatedInterpolation = ReturnType<Animated.Value['interpolate']>;
 
 type StockItemProps = {
   companyName: string;
@@ -52,9 +56,25 @@ export const StockItem = React.memo(
       return priceDiff > 0 ? 'green' : priceDiff < 0 ? 'red' : undefined;
     }, [price, lastClosePrice, lastCloseMode]);
 
+    const renderRightActions = (_: any, dragX: AnimatedInterpolation) => {
+      const trans = dragX.interpolate({
+        inputRange: [-80, 0],
+        outputRange: [0, 80],
+        extrapolate: 'clamp',
+      });
+
+      return (
+        <Animated.View style={[{ transform: [{ translateX: trans }] }]}>
+          <TouchableOpacity onPress={() => onToggleWatchlist(ticker)} style={styles.deleteBox}>
+            <TrashIcon />
+          </TouchableOpacity>
+        </Animated.View>
+      );
+    };
+
     return (
       !!ticker && (
-        <>
+        <Swipeable enabled={isInWatchlist} renderRightActions={renderRightActions}>
           <View style={styles.container}>
             <View style={styles.data}>
               <View style={styles.header}>
@@ -78,7 +98,7 @@ export const StockItem = React.memo(
           <View style={{ alignItems: 'center' }}>
             <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
           </View>
-        </>
+        </Swipeable>
       )
     );
   }
@@ -87,6 +107,7 @@ export const StockItem = React.memo(
 const styles = StyleSheet.create({
   container: {
     padding: 10,
+    paddingHorizontal: 20,
     width: '100%',
     flexDirection: 'row',
     gap: 16,
@@ -135,5 +156,12 @@ const styles = StyleSheet.create({
     marginVertical: 0,
     height: 1,
     width: '80%',
+  },
+  deleteBox: {
+    backgroundColor: 'red',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+    height: '100%',
   },
 });

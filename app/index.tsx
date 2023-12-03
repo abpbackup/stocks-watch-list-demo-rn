@@ -40,7 +40,7 @@ const Home = () => {
   return (
     <>
       <SafeAreaView style={[styles.safeArea, { paddingTop: statusBarHeight }]}>
-        <View style={{ width: '100%', flex: 1, paddingHorizontal: 10 }}>
+        <View style={{ width: '100%', flex: 1 }}>
           <View style={styles.searchBarContainer}>
             <SearchBar ref={searchRef} isConnected={isConnected} onSearch={handleSearch} />
           </View>
@@ -100,6 +100,7 @@ const Home = () => {
             style={styles.watchlistList}
             contentContainerStyle={{ justifyContent: 'center' }}
             keyboardShouldPersistTaps={'handled'}
+            onTouchEnd={closeKeyboard}
           />
         </View>
       </SafeAreaView>
