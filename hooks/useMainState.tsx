@@ -52,6 +52,10 @@ export const useMainState = () => {
 
     try {
       const stocks = await stockApi.findStocks(query);
+      if (stocks instanceof AbortSignal) {
+        return;
+      }
+
       let searchedStocks: Stock[] = [];
       stocks.forEach((stock) => {
         const isInWatchList = watchlistRef.current.has(stock.ticker);

@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 
 import { View, TextInput } from '../components/Themed';
 
-const SEARCH_DEBOUNCE = 200;
+const SEARCH_DEBOUNCE = 300;
 
 type SearchBarProps = {
   isConnected: boolean;
