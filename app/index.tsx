@@ -1,4 +1,4 @@
-import { FlatList, Platform, StatusBar, StyleSheet, Dimensions } from 'react-native';
+import { FlatList, Platform, StatusBar, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import { BlurView } from 'expo-blur';
 
 import { SearchBar } from '../components/SearchBar';
@@ -11,6 +11,8 @@ import { Searching } from '../components/Searching';
 import { useIsConnected } from '../providers/NetworkProvider';
 import { OfflineBanner } from '../components/OfflineBanner';
 import { ErrorBanner } from '../components/ErrorBanner';
+import { InfoButton } from '../components/InfoButton';
+import WelcomeMessage from '../components/WelcomeMessage';
 
 const Home = () => {
   const {
@@ -78,9 +80,23 @@ const Home = () => {
 
           {showBlur && <BlurView style={styles.blurView} intensity={10} onTouchEnd={cancelSearch} />}
 
-          <View style={styles.titleContainer}>
-            <Text style={styles.title}>Stocks watchlist</Text>
-          </View>
+          {watchlistStocks.length > 0 && (
+            <View style={styles.headerContainer}>
+              <View style={styles.titleContainer}>
+                <Text style={styles.title}>Stocks watchlist</Text>
+              </View>
+
+              <View style={styles.infoContainer}>
+                <InfoButton />
+              </View>
+            </View>
+          )}
+
+          {watchlistStocks.length === 0 && (
+            <View style={styles.welcomeMessageContainer}>
+              <WelcomeMessage />
+            </View>
+          )}
 
           <FlatList
             data={watchlistStocks}
@@ -138,11 +154,25 @@ const styles = StyleSheet.create({
   watchlistList: {
     width: '100%',
   },
-  titleContainer: {
+  headerContainer: {
     width: '100%',
-    marginVertical: 10,
+    marginTop: 10,
+    marginBottom: 4,
     alignItems: 'flex-start',
-    marginLeft: 12,
+    flexDirection: 'row',
+    height: 48,
+  },
+  titleContainer: {
+    paddingLeft: 12,
+    flexGrow: 1,
+    height: '100%',
+    justifyContent: 'center',
+  },
+  infoContainer: {
+    height: '100%',
+    width: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   title: {
     fontSize: 24,
@@ -151,6 +181,7 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
+  welcomeMessageContainer: {},
 });
 
 export default Home;

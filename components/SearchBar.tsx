@@ -41,7 +41,7 @@ export const SearchBar = forwardRef(({ isConnected, onSearch }: SearchBarProps, 
     <View style={styles.container}>
       <View style={styles.inputContainer}>
         <TextInput
-          placeholder={isConnected ? 'Search stocks' : 'Please check your connection'}
+          placeholder={isConnected ? 'Search for stocks' : 'Please check your connection'}
           value={query}
           onChangeText={setQuery}
           style={styles.input}
