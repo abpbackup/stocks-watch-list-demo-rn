@@ -48,7 +48,11 @@ const Home = () => {
                   keyExtractor={(item) => item.ticker}
                   renderItem={({ item }) => (
                     <StockItem
-                      stock={item}
+                      companyName={item.companyName}
+                      ticker={item.ticker}
+                      price={item.price}
+                      isInWatchlist={item.isInWatchlist}
+                      lastClosePrice={item.lastClosePrice}
                       lastCloseMode={lastCloseMode}
                       onToggleWatchlist={handleToggleWatchlist}
                       onToggleLastCloseMode={handleToggleLastCloseMode}
@@ -71,7 +75,11 @@ const Home = () => {
             keyExtractor={(item) => item.ticker}
             renderItem={({ item }) => (
               <StockItem
-                stock={{ ...item, isInWatchlist: true }}
+                companyName={item.companyName}
+                ticker={item.ticker}
+                price={item.price}
+                isInWatchlist={true}
+                lastClosePrice={item.lastClosePrice}
                 lastCloseMode={lastCloseMode}
                 onToggleWatchlist={handleToggleWatchlist}
                 onToggleLastCloseMode={handleToggleLastCloseMode}

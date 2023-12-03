@@ -8,58 +8,69 @@ import { primaryColor } from '../constants/Colors';
 import PricePlaceholder from './PricePlaceholder';
 
 type StockItemProps = {
-  stock: Stock;
+  companyName: string;
+  ticker: string;
+  price: number | undefined;
+  isInWatchlist: boolean | undefined;
+  lastClosePrice: number | undefined;
   lastCloseMode: ToggleMode;
   onToggleWatchlist: (ticker: string) => void;
   onToggleLastCloseMode: () => void;
 };
 
 export const StockItem = React.memo(
-  ({ stock, lastCloseMode = 'amount', onToggleWatchlist, onToggleLastCloseMode }: StockItemProps) => {
+  ({
+    companyName,
+    ticker,
+    price,
+    lastClosePrice,
+    isInWatchlist = false,
+    lastCloseMode = 'amount',
+    onToggleWatchlist,
+    onToggleLastCloseMode,
+  }: StockItemProps) => {
     const theme = useColorScheme() ?? 'light';
 
     const starFillColor = useMemo(() => {
-      return theme === 'dark' ? (stock.isInWatchlist ? 'blue' : 'white') : stock.isInWatchlist ? primaryColor : '#ddd';
-    }, [theme]);
+      return theme === 'dark' ? (isInWatchlist ? 'blue' : 'white') : isInWatchlist ? primaryColor : '#ddd';
+    }, [theme, isInWatchlist]);
     const starBorderColor = useMemo(() => {
-      return theme === 'dark' ? (stock.isInWatchlist ? 'white' : 'gray') : stock.isInWatchlist ? primaryColor : '#aaa';
-    }, [theme]);
+      return theme === 'dark' ? (isInWatchlist ? 'white' : 'gray') : isInWatchlist ? primaryColor : '#aaa';
+    }, [theme, isInWatchlist]);
 
     const lastCloseChange = useMemo(() => {
-      const priceDiff = Number(stock.price) - Number(stock.lastClosePrice);
-      const percentChange = (priceDiff / Number(stock.lastClosePrice)) * 100;
+      const priceDiff = Number(price) - Number(lastClosePrice);
+      const percentChange = (priceDiff / Number(lastClosePrice)) * 100;
       const prefix = lastCloseMode === 'amount' ? '$ ' : '';
       const suffix = lastCloseMode === 'percent' ? ' %' : '';
       const val = (lastCloseMode === 'amount' ? priceDiff : percentChange).toFixed(2);
       return `${prefix}${val}${suffix}`;
-    }, [stock.price, stock.lastClosePrice, lastCloseMode]);
+    }, [price, lastClosePrice, lastCloseMode]);
 
     const lastCloseColor = useMemo(() => {
-      const priceDiff = Number(stock.price) - Number(stock.lastClosePrice);
+      const priceDiff = Number(price) - Number(lastClosePrice);
       return priceDiff > 0 ? 'green' : priceDiff < 0 ? 'red' : undefined;
-    }, [stock.price, stock.lastClosePrice, lastCloseMode]);
+    }, [price, lastClosePrice, lastCloseMode]);
 
     return (
-      stock && (
+      !!ticker && (
         <>
           <View style={styles.container}>
             <View style={styles.data}>
               <View style={styles.header}>
                 <View style={styles.tickerContainer}>
-                  <Text style={styles.ticker}>{stock.ticker}</Text>
+                  <Text style={styles.ticker}>{ticker}</Text>
                   <Text numberOfLines={1} style={styles.name}>
-                    {stock.companyName}
+                    {companyName}
                   </Text>
                 </View>
                 <TouchableOpacity style={styles.priceContainer} onPress={onToggleLastCloseMode}>
-                  <Text style={styles.price}>$ {stock.price ? stock.price?.toFixed(2) : <PricePlaceholder />}</Text>
-                  <Text style={[styles.closePrice, { color: lastCloseColor }]}>
-                    {stock.price ? lastCloseChange : null}
-                  </Text>
+                  <Text style={styles.price}>$ {price ? price?.toFixed(2) : <PricePlaceholder />}</Text>
+                  <Text style={[styles.closePrice, { color: lastCloseColor }]}>{price ? lastCloseChange : null}</Text>
                 </TouchableOpacity>
               </View>
             </View>
-            <TouchableOpacity style={styles.starContainer} onPress={() => onToggleWatchlist(stock.ticker)}>
+            <TouchableOpacity style={styles.starContainer} onPress={() => onToggleWatchlist(ticker)}>
               <StarIcon color={starFillColor} borderColor={starBorderColor} size={30} />
             </TouchableOpacity>
           </View>
