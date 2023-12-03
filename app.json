@@ -39,9 +39,15 @@
         "origin": false
       },
       "eas": {
-        "projectId": "372101d6-7752-432a-864c-ace440df6408"
+        "projectId": "ffdc6bec-c1aa-4a38-85e7-ff285ba3dade"
       }
     },
-    "owner": "abp.backup"
+    "owner": "abp.backup",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/ffdc6bec-c1aa-4a38-85e7-ff285ba3dade"
+    }
   }
 }
