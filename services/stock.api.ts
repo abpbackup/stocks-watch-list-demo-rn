@@ -1,4 +1,4 @@
-import { ApiPricesResponse, ApiStocksResponse, Stock } from '../constants/types';
+import { ApiPricesResponse, ApiStocksResponse, Stock } from '../types/types';
 import { API_URL, API_KEY } from '@env';
 
 const createRestApi = () => {

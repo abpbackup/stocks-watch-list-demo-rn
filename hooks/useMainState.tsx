@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Stock, ToggleMode } from '../constants/types';
+import { Stock, ToggleMode } from '../types/types';
 import { store } from '../store/store';
 import { stockApi } from '../services/stock.api';
 import { Keyboard } from 'react-native';

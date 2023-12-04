@@ -1,4 +1,4 @@
-import { Stock } from '../constants/types';
+import { Stock } from '../types/types';
 
 export const mockStocks: Stock[] = [
   {

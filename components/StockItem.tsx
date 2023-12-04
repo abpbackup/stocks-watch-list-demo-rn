@@ -3,7 +3,7 @@ import { StyleSheet, TouchableOpacity, useColorScheme, Animated } from 'react-na
 import { Swipeable } from 'react-native-gesture-handler';
 
 import { View, Text } from './Themed';
-import { ToggleMode } from '../constants/types';
+import { ToggleMode } from '../types/types';
 import StarIcon from './StarIcon';
 import { primaryColor } from '../constants/Colors';
 import PricePlaceholder from './PricePlaceholder';

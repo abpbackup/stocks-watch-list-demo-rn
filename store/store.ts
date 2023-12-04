@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Stock } from '../constants/types';
+import { Stock } from '../types/types';
 
 type AvailableKeys = 'stocks' | 'watchlist';
 

@@ -1,6 +1,6 @@
 import Fuse from 'fuse.js';
 
-import { Stock } from '../constants/types';
+import { Stock } from '../types/types';
 
 const fuseOptions = {
   keys: ['companyName', 'ticker'],

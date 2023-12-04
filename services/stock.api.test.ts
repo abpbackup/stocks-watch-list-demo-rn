@@ -1,14 +1,4 @@
-import { stockApi } from '../../services/stock.api';
-
-// Mock Constants
-jest.mock('expo-constants', () => ({
-  expoConfig: {
-    extra: {
-      apiUrl: 'https://test-url.com/',
-      apiKey: 'testApiKey',
-    },
-  },
-}));
+import { stockApi } from './stock.api';
 
 // Mock Fetch
 global.fetch = jest.fn();

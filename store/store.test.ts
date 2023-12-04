@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Stock } from '../../constants/types';
-import { store } from '../../store/store';
+
+import { Stock } from '../types/types';
+import { store } from './store';
 
 // Mock AsyncStorage methods
 jest.mock('@react-native-async-storage/async-storage', () => ({
