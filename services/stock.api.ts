@@ -1,11 +1,12 @@
-import Constants from 'expo-constants';
 import { ApiPricesResponse, ApiStocksResponse, Stock } from '../constants/types';
+import { API_URL, API_KEY } from '@env';
 
 const createRestApi = () => {
   // Create an instance of AbortController
   let abortController = new AbortController();
 
-  const { apiUrl, apiKey } = Constants.expoConfig?.extra || { apiKey: null, apiUrl: null };
+  const apiUrl = API_URL ?? '';
+  const apiKey = API_KEY ?? '';
 
   const mapStockResponseToStocks = (res: ApiStocksResponse) => {
     const stocks: Stock[] = [];

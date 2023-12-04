@@ -33,8 +33,6 @@
       "typedRoutes": true
     },
     "extra": {
-      "apiUrl": "https://app.albert.com/casestudy/stock/v2/",
-      "apiKey": "d2db5753-33f6-4e25-b915-6cbdda7953e7",
       "router": {
         "origin": false
       },

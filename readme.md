@@ -33,7 +33,7 @@ To execute tests, run:
 
 ## API access
 
-Add the proper `ApiUrl` and `ApiKey` in app.json file under the `extra` key .
+Add the proper `API_URL` and `API_KEY` to the .env.example and then rename it to .env
 
 ## Troubleshooting
 
